@@ -14,10 +14,12 @@
     git clone https://github.com/PeterL1n/BackgroundMattingV2.git
     ```
 3. suggested model to use is `pytorch_resnet50`
-    - download it using this link: https://drive.google.com/file/d/1ErIAsB_miVhYL9GDlYUmfbqlV293mSYf/view?usp=drive_link and upload to the server through `scp`. Suggested command is:
-        ```
-        scp <LOCAL_PATH_TO_MODEL> <server name>:<PATH_TO_BGMATTING_REPO>
-        ```
+
+    - download it using this link: https://drive.google.com/file/d/1ErIAsB_miVhYL9GDlYUmfbqlV293mSYf/view?usp=drive_link and upload to the server through `scp`. 
+        - Suggested command is:
+            ```
+            scp <LOCAL_PATH_TO_MODEL> <server name>:<PATH_TO_BGMATTING_REPO>
+            ```
     - (trying to see if `gdown` works)
 - other models can be downloaded at https://drive.google.com/drive/folders/1cbetlrKREitIgjnIikG1HdM4x72FtgBh
 - detailed usage of each model: https://github.com/PeterL1n/BackgroundMattingV2/blob/master/doc/model_usage.md 
@@ -29,16 +31,20 @@
     - Download Miniconda3-latest-Linux-x86_64.sh:
 
         https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        
         ```
         bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda
+        
         source /opt/miniconda/bin/activate
         ```
     - 
         ```
         pip install torch torchvision opencv-python tqdm
+        
         apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
         ```
 2. Inside `BackgroundMattingV2`, make two directories `videos` and `bgr` to store the videos and background images of the videos 
+    
     - suggested video types: mp4, mov
     - suggested background image types: png
 
@@ -56,6 +62,7 @@
             --output-dir "output/" \
             --output-type com fgr pha err ref
     ```
+    
     - The `output/com.mp4` will contain the video with background subtracted
 
 ## COLMAP ##
