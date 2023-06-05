@@ -9,36 +9,34 @@ parser.add_argument('--src',type=str,help='path to input images folders',require
 args = parser.parse_args()
 
 # Define the paths
-source_folder = args.src
-colmap_input_folder = 'colmap_inputs'
-matting_script_path = os.path.join(os.getcwd(), "BackgroundMattingV2/inference_images.py")
-matting_model_path = os.path.join(os.getcwd(), "BackgroundMattingV2/pytorch_resnet50.pth")
+SRC_FLDR = args.src
+COLMAP_INPUT = 'colmap_inputs'
+MATTING_SCRIPT = os.path.join(os.getcwd(), "BackgroundMattingV2/inference_images.py")
+MATTING_MODEL = os.path.join(os.getcwd(), "BackgroundMattingV2/pytorch_resnet50.pth")
 
-# Take the first image from each folder to be inputs to COLMAP
-
-# Create the destination folder if it doesn't exist
-if os.path.exists(colmap_input_folder):
-        shutil.rmtree(colmap_input_folder)
-os.makedirs(colmap_input_folder, mode=0o777)
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+if os.path.exists(COLMAP_INPUT):
+        shutil.rmtree(COLMAP_INPUT)
+os.makedirs(COLMAP_INPUT, mode=0o777)
 
 if os.path.exists("colmap/results/"):
                 shutil.rmtree("colmap/results/")
 os.makedirs("colmap/results/", mode=0o777)
 
 # Iterate over the source folders
-for folder_name in os.listdir(source_folder):
-    folder_path = os.path.join(source_folder, folder_name)
+for folder_name in os.listdir(SRC_FLDR):
+    folder_path = os.path.join(SRC_FLDR, folder_name)
     if os.path.isdir(folder_path):
         image_files = os.listdir(folder_path)
         if image_files:
             first_image_path = os.path.join(folder_path, image_files[0])
-            destination_path = os.path.join(colmap_input_folder, f"{folder_name}.jpg")
+            destination_path = os.path.join(COLMAP_INPUT, f"{folder_name}.jpg")
             shutil.copy(first_image_path, destination_path)
 
 # Run colmap on colmap_inputs images
 subprocess.run(["colmap", "automatic_reconstructor",
                 "--workspace_path", "colmap/results",
-                "--image_path", colmap_input_folder,
+                "--image_path", COLMAP_INPUT,
                 "--dense", "0"])
 # output will be at colmap/results/sparse/0
 
@@ -61,21 +59,21 @@ subprocess.run(["python", "instant-ngp/scripts/colmap2nerf.py",
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Run background matting
-bgr_images = os.listdir(colmap_input_folder)
+bgr_images = os.listdir(COLMAP_INPUT)
 
 if os.path.exists("matting_all"):
     shutil.rmtree("matting_all")
 os.makedirs("matting_all", mode=0o777)
         
-for idx, folder_name in enumerate(os.listdir(source_folder)):
-    folder_path = os.path.join(source_folder, folder_name)
+for idx, folder_name in enumerate(os.listdir(SRC_FLDR)):
+    folder_path = os.path.join(SRC_FLDR, folder_name)
     if os.path.isdir(folder_path):
         
         # create bgr directory
         if os.path.exists("bgr_img"):
                 shutil.rmtree("bgr_img")
         os.makedirs("bgr_img", mode=0o777)
-        bgr_path = os.path.join(colmap_input_folder, bgr_images[idx])
+        bgr_path = os.path.join(COLMAP_INPUT, bgr_images[idx])
         bgr_dest_path = "bgr_img/bgr.jpg"
         shutil.copy(bgr_path, bgr_dest_path)
             
@@ -90,13 +88,13 @@ for idx, folder_name in enumerate(os.listdir(source_folder)):
             img_dest_path = "src_img/src.jpg"
             shutil.copy(img_path, img_dest_path)
             
-            subprocess.run(["python", matting_script_path,
+            subprocess.run(["python", MATTING_SCRIPT,
                             "--model-type", "mattingrefine",
                             "--model-backbone", "resnet50",
                             "--model-backbone-scale", "0.25",
                             "--model-refine-mode", "sampling",
                             "--model-refine-sample-pixels", "80000",
-                            "--model-checkpoint", matting_model_path,
+                            "--model-checkpoint", MATTING_MODEL,
                             "--images-src", "src_img/",
                             "--images-bgr", "bgr_img/",
                             "--output-dir", "matting_temp/".format(idx),
@@ -105,6 +103,9 @@ for idx, folder_name in enumerate(os.listdir(source_folder)):
             matted_path = "matting_temp/com/src.png"
             shutil.copy(matted_path, "matting_all/matted{}_{}.png".format(idx, i))
             shutil.rmtree("matting_temp")
+
+shutil.rmtree("src_img")
+shutil.rmtree("bgr_img")
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 # recreate json
@@ -129,11 +130,11 @@ def max_length_dir(path):
     return max
 
 frames = data['frames']
-n = max_length_dir(source_folder)
+n = max_length_dir(SRC_FLDR)
 
-for idx, folder_name in enumerate(os.listdir(source_folder)):
+for idx, folder_name in enumerate(os.listdir(SRC_FLDR)):
     
-    folder_path = os.path.join(source_folder, folder_name)
+    folder_path = os.path.join(SRC_FLDR, folder_name)
     
     if os.path.isdir(folder_path):
         for i, image in enumerate(os.listdir(folder_path)):
