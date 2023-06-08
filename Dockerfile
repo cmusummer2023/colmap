@@ -21,11 +21,13 @@ RUN source /opt/miniconda/etc/profile.d/conda.sh && conda activate base && \
 RUN /opt/miniconda/bin/pip install gdown
 
 RUN /opt/miniconda/bin/gdown https://drive.google.com/uc?id=1ErIAsB_miVhYL9GDlYUmfbqlV293mSYf -O BackgroundMattingV2/
+RUN /opt/miniconda/bin/gdown https://drive.google.com/file/d/1T5GfMFz8l5rJFNQBvkHeBS04b0JFeQPl -O colmap/
 RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6
 
 ENV PATH=/opt/miniconda/bin:$PATH
 
 COPY script.py /home/user/script.py
+COPY images /home/user/images
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "/bin/bash", "-c"]
 CMD ["bash"]
